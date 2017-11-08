@@ -9,6 +9,8 @@
 			</canvas>
 		</div>
 		<script src='gl-matrix-min.js'></script>
+		<script src="build/oimo.min.js"></script>
+		<div w3-include-html="index.html"></div>
 		<script>
 			function Radians(angle_in_degrees) 
 			{
@@ -117,6 +119,8 @@
 				}
 			}
 
+			console.log(particle.pos);
+			
 			var cube = new Cube();
 			
 			var vertCode =
