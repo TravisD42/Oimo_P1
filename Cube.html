@@ -137,6 +137,40 @@
 			friction: 0.2,
 			restitution: 0.5,
 		});
+		
+		particle.linearVelocity.x += 1
+
+			var ground = oimo_world.add({ 
+			type:'box', // type of shape : sphere, box, cylinder 
+			size:[20,2,20], // size of shape
+			pos:[0,0,0], // start position in degree
+			move:false, // dynamic or statique
+			density: 1,
+			friction: 0.2,
+			restitution: 1.0,
+		}); 
+
+			var wall = oimo_world.add({ 
+			type:'box', // type of shape : sphere, box, cylinder 
+			size:[2,10,20], // size of shape
+			pos:[9,6,0], // start position in degree
+			move:false, // dynamic or statique
+			density: 1,
+			friction: 0.2,
+			restitution: 1.0,
+		});
+		function HelloWorld(now)
+	{
+		oimo_world.step();
+		console.log(particle.pos);
+		if (particle.pos.y > -10)
+		{
+			requestAnimationFrame(HelloWorld);
+		}
+	}
+
+	requestAnimationFrame(HelloWorld);
+
 					
 			console.log("Particle Position = " + particle.pos);
 
@@ -204,7 +238,7 @@
 
 				var mdv = mat4.create();
 				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 10.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
-				mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
+			//	mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
 				mat4.translate(mdv, mdv, [particle.pos.x, particle.pos.y, particle.pos.z]);
 				console.log("Particle Pos = " + particle.pos);
 				//mat4.scale(mdv, mdv, [1.0, Math.sin(Radians(now * 30)) + 1.5, 1.0]);
