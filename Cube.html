@@ -131,13 +131,13 @@
 			var particle = oimo_world.add({ 
 			type:'sphere', // type of shape : sphere, box, cylinder 
 			size:[1,1,1], // size of shape
-			pos:[-0.75,0.5,0], // start position in degree
+			pos: [-1.0, 2, 0], // start position in degree
 			move:true, // dynamic or statique
 			density: 1,
 			friction: 0.2,
 			restitution: 0.5,
 		});
-
+					
 			console.log("Particle Position = " + particle.pos);
 
 			var cube = new Cube();
@@ -205,7 +205,7 @@
 				var mdv = mat4.create();
 				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 10.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
 				mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
-				mat4.translate(mdv, mdv, [-1, 2, 0]);
+				mat4.translate(mdv, mdv, [particle.pos.x, particle.pos.y, particle.pos.z]);
 				console.log("Particle Pos = " + particle.pos);
 				//mat4.scale(mdv, mdv, [1.0, Math.sin(Radians(now * 30)) + 1.5, 1.0]);
 				gl.uniformMatrix4fv(modelview_matrix, false, mdv);
