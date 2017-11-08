@@ -138,7 +138,7 @@
 			restitution: 0.5,
 		});
 		
-		particle.linearVelocity.x += 3
+		particle.linearVelocity.x += 10
 
 			var ground = oimo_world.add({ 
 			type:'box', // type of shape : sphere, box, cylinder 
@@ -159,15 +159,20 @@
 			friction: 0.2,
 			restitution: 1.0,
 		});
+
 		function HelloWorld(now)
-	{
-		oimo_world.step();
-		console.log(particle.pos);
-		if (particle.pos.y > -10)
 		{
-			requestAnimationFrame(HelloWorld);
+		
+			if (now > 1000)
+			{
+				oimo_world.step();
+				console.log(particle.pos);
+			}
+			if (particle.pos.y > -10)
+			{
+				requestAnimationFrame(HelloWorld);
+			}
 		}
-	}
 
 	requestAnimationFrame(HelloWorld);
 
@@ -223,7 +228,7 @@
 			gl.enableVertexAttribArray(c);
 
 			var prj = mat4.create()
-			mat4.perspective(prj, Radians(50.0), 1.0, 0.5, 20.0);
+			mat4.perspective(prj, Radians(70.0), 1.0, 0.5, 20.0);
 			var modelview_matrix = gl.getUniformLocation(shaderProgram, "modelview_matrix");
 			var projection_matrix = gl.getUniformLocation(shaderProgram, "projection_matrix");
 			// In this example program, the projection matrix is a constant.
@@ -237,6 +242,7 @@
 				gl.enable(gl.DEPTH_TEST);
 
 				var mdv = mat4.create();
+				var mdvcopy = mat4.create();
 				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 20.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
 			//	mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
 				mat4.translate(mdv, mdv, [particle.pos.x, particle.pos.y, particle.pos.z]);
