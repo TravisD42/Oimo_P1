@@ -118,9 +118,28 @@
 					}
 				}
 			}
+			var oimo_world = new OIMO.World({ 
+			timestep: 1/60,
+			iterations: 8,
+			broadphase: 2,
+			worldscale: 1,
+			random: true,
+			info:false,
+			gravity: [0,-9.8,0]
+		});
 
-			console.log(particle.pos);
-			
+			var particle = oimo_world.add({ 
+			type:'sphere', // type of shape : sphere, box, cylinder 
+			size:[1,1,1], // size of shape
+			pos:[-10,20,0], // start position in degree
+			move:true, // dynamic or statique
+			density: 1,
+			friction: 0.2,
+			restitution: 0.5,
+		});
+
+			console.log("Particle Position = " + particle.pos);
+
 			var cube = new Cube();
 			
 			var vertCode =
