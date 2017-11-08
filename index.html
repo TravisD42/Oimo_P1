@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="build/oimo.min.js"></script>
+    <title>OIMO Hello, World</title>
+</head>
+<body>
+    This does nothing visual - open up the console log window.
+    <script>
+        var oimo_world = new OIMO.World({ 
+        timestep: 1/60,
+        iterations: 8,
+        broadphase: 2,
+        worldscale: 1,
+        random: true,
+        info:false,
+        gravity: [0,-9.8,0]
+    });
+
+    var particle = oimo_world.add({ 
+    type:'sphere', // type of shape : sphere, box, cylinder 
+    size:[1,1,1], // size of shape
+    pos:[-10,20,0], // start position in degree
+    move:true, // dynamic or statique
+    density: 1,
+    friction: 0.2,
+    restitution: 0.5,
+});
+
+particle.linearVelocity.x += 10
+    var ground = oimo_world.add({ 
+    type:'box', // type of shape : sphere, box, cylinder 
+    size:[20,2,20], // size of shape
+    pos:[0,0,0], // start position in degree
+    move:false, // dynamic or statique
+    density: 1,
+    friction: 0.2,
+    restitution: 1.0,
+ }); 
+
+ var wall = oimo_world.add({ 
+    type:'box', // type of shape : sphere, box, cylinder 
+    size:[2,10,20], // size of shape
+    pos:[9,6,0], // start position in degree
+    move:false, // dynamic or statique
+    density: 1,
+    friction: 0.2,
+    restitution: 1.0,
+ }); 
+
+ function HelloWorld(now)
+ {
+     oimo_world.step();
+     console.log(particle.pos);
+     if (particle.pos.y > -10)
+     {
+         requestAnimationFrame(HelloWorld);
+     }
+ }
+
+ requestAnimationFrame(HelloWorld);
+        </script>
+</body>
+</html>
