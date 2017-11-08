@@ -35,13 +35,13 @@
 						0.5, 0.5, 0.5
 					];
 					this.initial_colors = [
-						.9, 0, 0.14,
-						.9, 0, 0.14,
-						.9, 0, 0.14,
+						1.0, 0.5, 0.4,
+						1.0, 0.5, 0.4,
+						1.0, 0.5, 0.4,
 
-						.58, 0.0, 0.62,
-						.58, 0.0, 0.62,
-						.58, 0.0, 0.62,
+						0.0, 1.0, 0.7,
+						0.0, 1.0, 0.7,
+						0.0, 1.0, 0.7
 					];
 					this.vertices = [];
 					this.colors = [];
@@ -137,8 +137,9 @@
 			friction: 0.2,
 			restitution: 0.5,
 		});
-		
-		particle.linearVelocity.x += 10
+		particle.rotation.setQuat([0.1, 0.2, 0.1, 1]);
+
+		particle.linearVelocity.x += 7;
 
 			var ground = oimo_world.add({ 
 			type:'box', // type of shape : sphere, box, cylinder 
@@ -176,7 +177,6 @@
 
 	requestAnimationFrame(HelloWorld);
 
-					
 			console.log("Particle Position = " + particle.pos);
 
 			var cube = new Cube();
@@ -235,41 +235,35 @@
 			// It can be initialized once, here outside the display loop.
 			gl.uniformMatrix4fv(projection_matrix, false, prj);
 
-
-
 			function Draw(now)
 			{
 				// now is delivered in milliseconds. This converts it to seconds.
-				now = now / 1000.0;				
-				
-				gl.clearColor(0.1, 0.1, 0.1, 1.0);
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-				gl.viewport(0,0,canvas.width,canvas.height);
+				now = now / 1000.0;
 				gl.enable(gl.DEPTH_TEST);
 
 				var mdv = mat4.create();
 				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 20.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
 			//	mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
-				mat4.translate(mdv, mdv, [particle.pos.x, particle.pos.y, particle.pos.z]);
+				var m = mat4.create();
+				// center - used for translation
+				var c = [particle.pos.x, particle.pos.y, particle.pos.z];
+				// orientation - used for rotation
+				var o = [particle.orientation.x, particle.orientation.y, particle.orientation.z, particle.orientation.w];
+				mat4.fromRotationTranslation(m, o, c);
+				mat4.multiply(m, m, mdv);
 				//mat4.scale(mdv, mdv, [1.0, Math.sin(Radians(now * 30)) + 1.5, 1.0]);
-				gl.uniformMatrix4fv(modelview_matrix, false, mdv);
-				gl.uniformMatrix4fv(projection_matrix, false, prj);	
+				gl.uniformMatrix4fv(modelview_matrix, false, m);
 
-
+				gl.clearColor(0.1, 0.1, 0.1, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				gl.viewport(0,0,canvas.width,canvas.height);
 				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
 
-
-			//	var local_copy_of_mdv = mat4.create();
-			//	local_copy_of_mdv = mat4.clone(mdv);
-			//	gl.uniformMatrix4fv(modelview_matrix, false, mdv);
-			//	mat4.translate(mdv, mdv, [0, 1, 0]);
-
-			//	gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
 				// this is a test for a second object on screen
-			//	var mdv2 = mat4.create();
-			//	mdv2 = mat4.copy(mdv2, mdv);
-			//	mat4.translate(mdv2, mdv2, [20,2,20]);
-			//	//mat4.scale(mdv2, mdv2, [ground.size.x, ground.size.y, ground.size.z] );
+				var mdv2 = mat4.create();
+				mdv2 = mat4.copy(mdv2, mdv);
+				mat4.translate(mdv2, mdv2, [20,2,20]);
+				//mat4.scale(mdv2, mdv2, [ground.size.x, ground.size.y, ground.size.z] );
 
 				requestAnimationFrame(Draw);
 			}
