@@ -113,12 +113,10 @@
 						gl.bindBuffer(gl.ARRAY_BUFFER, this.color_buffer);
 						gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
 						gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-						
 					}
 				}
 			}
-			var oimo_world = new OIMO.World({ 
+		var oimo_world = new OIMO.World({ 
 			timestep: 1/60,
 			iterations: 8,
 			broadphase: 2,
@@ -128,16 +126,19 @@
 			gravity: [0,-9.8,0]
 		});
 
-			var particle = oimo_world.add({ 
-			type:'sphere', // type of shape : sphere, box, cylinder 
+		var particle = oimo_world.add({ 
+			type:'box', // type of shape : sphere, box, cylinder 
 			size:[1,1,1], // size of shape
-			pos: [-1.0, 10, 0], // start position in degree
+			pos: [-1.0, 10, 0], // start position
+			rot: [45, 45, 45],
 			move:true, // dynamic or statique
 			density: 1,
 			friction: 0.2,
 			restitution: 0.5,
 		});
-		particle.rotation.setQuat([0.1, 0.2, 0.1, 1]);
+		//debugger;
+		//particle.angularVelocity.y = 1;
+		//particle.rotation.setQuat([0.1, 0.2, 0.1, 1]);
 
 		particle.linearVelocity.x += 7;
 
@@ -163,12 +164,13 @@
 
 		function HelloWorld(now)
 		{
-		
 			if (now > 1000)
 			{
 				oimo_world.step();
 				console.log(particle.pos);
+				//console.log(particle.rot);
 			}
+
 			if (particle.pos.y > -10)
 			{
 				requestAnimationFrame(HelloWorld);
@@ -228,12 +230,31 @@
 			gl.enableVertexAttribArray(c);
 
 			var prj = mat4.create()
-			mat4.perspective(prj, Radians(70.0), 1.0, 0.5, 20.0);
+			mat4.perspective(prj, Radians(70.0), 1.0, 0.5, 50.0);
 			var modelview_matrix = gl.getUniformLocation(shaderProgram, "modelview_matrix");
 			var projection_matrix = gl.getUniformLocation(shaderProgram, "projection_matrix");
 			// In this example program, the projection matrix is a constant.
 			// It can be initialized once, here outside the display loop.
 			gl.uniformMatrix4fv(projection_matrix, false, prj);
+
+
+			document.addEventListener('keydown', function(event) 
+			{
+				// http://keycode.info/ is a useful resource for identifying keycode numbers.
+				switch (event.keyCode)
+				{
+					case 32:
+					[-1.0, 10, 0]
+					particle.pos.x = -1;
+					particle.pos.y = 10;
+					particle.pos.z = 0;
+					now = 0;
+						HelloWorld();
+						break;
+				}
+			}
+		)	
+
 
 			function Draw(now)
 			{
@@ -241,29 +262,46 @@
 				now = now / 1000.0;
 				gl.enable(gl.DEPTH_TEST);
 
+				//Particle
 				var mdv = mat4.create();
 				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 20.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
-			//	mat4.rotate(mdv, mdv, Radians(now * 90.0), vec3.fromValues(1.0, 1.0, 0.0));
 				var m = mat4.create();
 				// center - used for translation
 				var c = [particle.pos.x, particle.pos.y, particle.pos.z];
 				// orientation - used for rotation
 				var o = [particle.orientation.x, particle.orientation.y, particle.orientation.z, particle.orientation.w];
+				
 				mat4.fromRotationTranslation(m, o, c);
-				mat4.multiply(m, m, mdv);
-				//mat4.scale(mdv, mdv, [1.0, Math.sin(Radians(now * 30)) + 1.5, 1.0]);
+				mat4.multiply(m, mdv, m);
 				gl.uniformMatrix4fv(modelview_matrix, false, m);
 
 				gl.clearColor(0.1, 0.1, 0.1, 1.0);
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 				gl.viewport(0,0,canvas.width,canvas.height);
 				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+				
+		
 
-				// this is a test for a second object on screen
-				var mdv2 = mat4.create();
-				mdv2 = mat4.copy(mdv2, mdv);
-				mat4.translate(mdv2, mdv2, [20,2,20]);
-				//mat4.scale(mdv2, mdv2, [ground.size.x, ground.size.y, ground.size.z] );
+				//Ground
+				c = [ground.pos.x, ground.pos.y, ground.pos.z];
+				var o = [ground.orientation.x, ground.orientation.y, ground.orientation.z, ground.orientation.w];
+				mat4.fromRotationTranslation(m, o, c);
+				mat4.multiply(m, mdv, m);
+				mat4.scale(m, m, [ground.shapes.width, ground.shapes.height, ground.shapes.depth]);
+				gl.uniformMatrix4fv(modelview_matrix, false, m);
+
+				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+
+
+				//Wall
+				c = [wall.pos.x, wall.pos.y, wall.pos.z];
+				var o = [wall.orientation.x, wall.orientation.y, wall.orientation.z, wall.orientation.w];
+				mat4.fromRotationTranslation(m, o, c);
+				mat4.multiply(m, mdv, m);
+				mat4.scale(m, m, [wall.shapes.width, wall.shapes.height, wall.shapes.depth]);
+				gl.uniformMatrix4fv(modelview_matrix, false, m);
+
+				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
 
 				requestAnimationFrame(Draw);
 			}
