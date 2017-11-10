@@ -4,7 +4,7 @@
 	</head>
 	<body>
 		<div>
-			<canvas width = "700" height = "700 " id = "glcanvas">
+			<canvas width = "700" height = "700" id = "glcanvas">
 				Support for the canvas element is required.
 			</canvas>
 		</div>
@@ -16,10 +16,16 @@
 			{
 				return angle_in_degrees * (Math.PI / 180);
 			}
+			function RangeRand(min, max)
+			{
+				return (max - min) * Math.random() + min;
+			}
 
 			// THIS IS WEBGL 1
 			var canvas = document.getElementById('glcanvas');
 			var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+
 
 			class Cube
 			{
@@ -116,70 +122,7 @@
 					}
 				}
 			}
-		var oimo_world = new OIMO.World({ 
-			timestep: 1/60,
-			iterations: 8,
-			broadphase: 2,
-			worldscale: 1,
-			random: true,
-			info:false,
-			gravity: [0,-9.8,0]
-		});
 
-		var particle = oimo_world.add({ 
-			type:'box', // type of shape : sphere, box, cylinder 
-			size:[1,1,1], // size of shape
-			pos: [-1.0, 10, 0], // start position
-			rot: [45, 45, 45],
-			move:true, // dynamic or statique
-			density: 1,
-			friction: 0.2,
-			restitution: 0.5,
-		});
-		//debugger;
-		//particle.angularVelocity.y = 1;
-		//particle.rotation.setQuat([0.1, 0.2, 0.1, 1]);
-
-		particle.linearVelocity.x += 20;
-
-			var ground = oimo_world.add({ 
-			type:'box', // type of shape : sphere, box, cylinder 
-			size:[20,2,20], // size of shape
-			pos:[0,0,0], // start position in degree
-			move:false, // dynamic or statique
-			density: 1,
-			friction: 0.2,
-			restitution: 1.0,
-		}); 
-
-			var wall = oimo_world.add({ 
-			type:'box', // type of shape : sphere, box, cylinder 
-			size:[2,10,20], // size of shape
-			pos:[9,6,0], // start position in degree
-			move:false, // dynamic or statique
-			density: 1,
-			friction: 0.2,
-			restitution: 1.0,
-		});
-
-		function HelloWorld(now)
-		{
-			if (now > 1000)
-			{
-				oimo_world.step();
-				//console.log(particle.pos);
-				//console.log(particle.rot);
-			}
-
-			if (particle.pos.y > -30)
-			{
-				requestAnimationFrame(HelloWorld);
-			}
-		}
-
-	requestAnimationFrame(HelloWorld);
-
-			//console.log("Particle Position = " + particle.pos);
 
 			var cube = new Cube();
 			
@@ -229,8 +172,16 @@
 			gl.vertexAttribPointer(c, 3, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(c);
 
+			var cube_attribute = [];
+			for (var i = 0; i < 10 * 10 * 10; i++)
+			{
+				var t = {};
+				t.axis = [RangeRand(-1,1),RangeRand(-1,1),RangeRand(-1,1)];
+				t.speed = RangeRand(60, 120);
+				cube_attribute.push(t);
+			}
 			var prj = mat4.create()
-			mat4.perspective(prj, Radians(70.0), 1.0, 1.0, 50.0);
+			mat4.perspective(prj, Radians(65.0), 1.0, 1.0, 60.0);
 			var modelview_matrix = gl.getUniformLocation(shaderProgram, "modelview_matrix");
 			var projection_matrix = gl.getUniformLocation(shaderProgram, "projection_matrix");
 			// In this example program, the projection matrix is a constant.
@@ -238,34 +189,8 @@
 			gl.uniformMatrix4fv(projection_matrix, false, prj);
 
 
-			document.addEventListener('keydown', function(event) 
-			{
-				// http://keycode.info/ is a useful resource for identifying keycode numbers.
-				switch (event.keyCode)
-				{
-					case 32:
-						ResetCube();
-						break;
-				}
-			});	
 
-			function ResetCube(){
-				
-				
-				particle.resetPosition(-1, 10, 0);
-				particle.resetRotation(45, 45, 45);
 
-				// particle.pos = [-1,10,0];
-				// particle.rot = [45, 45, 45];
-				particle.linearVelocity.set(7, 0, 0);
-
-				// particle.linearVelocity.x = 0;
-				// particle.linearVelocity.y = 0;
-				// particle.linearVelocity.z = 0;
-				// particle.linearVelocity.x = 0;
-				// particle.linearVelocity.y = 0;
-				// particle.linearVelocity.z = 0;
-			}
 
 			function Draw(now)
 			{
@@ -275,44 +200,74 @@
 
 				//Particle
 				var mdv = mat4.create();
-				mat4.lookAt(mdv, vec3.fromValues(0.0, 3.0, 27.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
+				mat4.lookAt(mdv, vec3.fromValues(43.0, 40.0, 40.0), vec3.fromValues(0.0, 0.0, 0.0), vec3.fromValues(0.0, 1.0, 0.0));
 				var m = mat4.create();
 				// center - used for translation
-				var c = [particle.pos.x, particle.pos.y, particle.pos.z];
+				var c = [0, 0, 0];
 				// orientation - used for rotation
-				var o = [particle.orientation.x, particle.orientation.y, particle.orientation.z, particle.orientation.w];
+				var o = [0,0,0,1];
 				
 				mat4.fromRotationTranslation(m, o, c);
-				mat4.multiply(m, mdv, m);
-				gl.uniformMatrix4fv(modelview_matrix, false, m);
+				//mat4.multiply(m, mdv, m);
+				//gl.uniformMatrix4fv(modelview_matrix, false, m);
 
 				gl.clearColor(0.1, 0.1, 0.1, 1.0);
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 				gl.viewport(0,0,canvas.width,canvas.height);
-				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+				//gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+				
 				
 		
+				var x =0; var y =0; var z=0;
+				for (let i = 0; i < 10; i++)
+				{
+					for (let j = 0; j < 10; j++)
+					{
+						for (let h = 0; h < 10; h++)
+						{
+							var index = i * 100 + j * 10 + h;
 
-				//Ground
-				c = [ground.pos.x, ground.pos.y, ground.pos.z];
-				var o = [ground.orientation.x, ground.orientation.y, ground.orientation.z, ground.orientation.w];
-				mat4.fromRotationTranslation(m, o, c);
-				mat4.multiply(m, mdv, m);
-				mat4.scale(m, m, [ground.shapes.width, ground.shapes.height, ground.shapes.depth]);
-				gl.uniformMatrix4fv(modelview_matrix, false, m);
+							x+=3;
 
-				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+							c = [x,y,z];
+							//var speed = RangeRand(15, 90);
+							var speed = 90;
+							//var xrot = RangeRand(1, 0);
+							//var yrot = RangeRand(1, 0);
+							//var zrot = RangeRand(1, 0);
+
+							mat4.fromRotationTranslation(m, o, c);
+							mat4.multiply(m, mdv, m);
+							mat4.rotate(m, m, Radians(now * cube_attribute[index].speed), cube_attribute[index].axis);
+							gl.uniformMatrix4fv(modelview_matrix, false, m);
+
+							gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+						}
+						x=0
+						y+=3;
+					}
+					y=0;
+					z+=3;
+				}
+				//c = [0,2,0];
+				
+			//	mat4.fromRotationTranslation(m, o, c);
+			//	mat4.multiply(m, mdv, m);
+				
+			//	gl.uniformMatrix4fv(modelview_matrix, false, m);
+
+			//	gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
 
 
 				//Wall
-				c = [wall.pos.x, wall.pos.y, wall.pos.z];
-				var o = [wall.orientation.x, wall.orientation.y, wall.orientation.z, wall.orientation.w];
-				mat4.fromRotationTranslation(m, o, c);
-				mat4.multiply(m, mdv, m);
-				mat4.scale(m, m, [wall.shapes.width, wall.shapes.height, wall.shapes.depth]);
-				gl.uniformMatrix4fv(modelview_matrix, false, m);
+				//c = [wall.pos.x, wall.pos.y, wall.pos.z];
+				//var o = [wall.orientation.x, wall.orientation.y, wall.orientation.z, wall.orientation.w];
+				//mat4.fromRotationTranslation(m, o, c);
+				//mat4.multiply(m, mdv, m);
+				//mat4.scale(m, m, [wall.shapes.width, wall.shapes.height, wall.shapes.depth]);
+				//gl.uniformMatrix4fv(modelview_matrix, false, m);
 
-				gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
+				//gl.drawArrays(gl.TRIANGLES, 0, cube.vertices.length / 3);
 
 				requestAnimationFrame(Draw);
 			}
